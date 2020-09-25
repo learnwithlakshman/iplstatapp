@@ -46,11 +46,7 @@ public class IplStatServiceImpl implements IplStatService {
 		return roleCount;
 	}
 
-	@Override
-	public List<IRoleAmountDTO> getAmountByRole(String teamLabel) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public List<PlayerDTO> getByRole(String teamLabel, String role) {
@@ -59,6 +55,12 @@ public class IplStatServiceImpl implements IplStatService {
 		List<PlayerDTO> players = iplStatDao.getByRole(teamLabel, role);
 		log.info("Player count is :{} for team {} and role: {}", players.size(), teamLabel, role);
 		return players;
+	}
+	
+	@Override
+	public List<IRoleAmountDTO> getAmountByRole(String teamLabel) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
