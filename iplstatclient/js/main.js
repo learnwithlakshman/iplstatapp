@@ -9,7 +9,7 @@ function getLabels() {
     .then(response=>response.json())
     .then(res=>{
         labels = res["labels"];
-        str = "<select onchange ='getPlayers()' id='idTeamLabel'>";
+        str = "<select onchange ='getPlayers()' id='idTeamLabel' class='form-control'>";
         str += "<option value=''>Select Team label</option>";
         for (let label of labels) {
             str += `<option value=${label}>${label}</option>`
@@ -39,23 +39,8 @@ function getPlayers(){
 }
 
 function getPlayerCount(label){
- 
-    
-      // Load the Visualization API and the corechart package.
-      google.charts.load('current', {'packages':['corechart']});
-
-      // Set a callback to run when the Google Visualization API is loaded.
-      google.charts.setOnLoadCallback(drawChart);
-
-      // Callback that creates and populates a data table,
-      // instantiates the pie chart, passes in the data and
-      // draws it.
-      
- 
-    
-
-    
-
+    google.charts.load('current', {'packages':['corechart']});
+     google.charts.setOnLoadCallback(drawChart);
 }
 
 function drawChart(){
@@ -73,26 +58,69 @@ function drawChart(){
         data.addRows(rows);
 
         // Set chart options
-        var options = {'title':'Players count by Team',
-                       'width':400,
-                       'height':300};
-
+        var options = {'title':`Players count by Team : ${label}`,
+                       'width':600,
+                       'height':500};
+                       
+         var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
         // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-               
+         function selectHandler() {
+            var selectedItem = chart.getSelection()[0];
+            if (selectedItem) {
+              var role = data.getValue(selectedItem.row, 0);
+              showPlayersByRole(label,role);
+            }
+          }
+          google.visualization.events.addListener(chart, 'select', selectHandler);
+
+          chart.draw(data, options);
+       
+      
     });
 }
 
-function getPlayersByRoleAndLabel(){
 
+
+
+
+
+selectedLabel;
+selectedRole;
+function showPlayersByRole(label,role){
+        google.charts.load('current', {'packages':['table']});
+        google.charts.setOnLoadCallback(drawTable);
+        selectedLabel = label;
+        selectedRole = role;    
 }
+
+function drawTable(label,role) {
+
+    fetch(`http://localhost:8080/api/v1/iplstat/players/${selectedLabel}/${selectedRole}`)
+    .then(response=>response.json())
+    .then(res=>{
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Name');
+        data.addColumn('number', 'Salary');
+        data.addColumn('boolean', 'Full Time Employee');
+        data.addRows([
+          ['Mike',  {v: 10000, f: '$10,000'}, true],
+          ['Jim',   {v:8000,   f: '$8,000'},  false],
+          ['Alice', {v: 12500, f: '$12,500'}, true],
+          ['Bob',   {v: 7000,  f: '$7,000'},  true]
+        ]);
+      
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+      
+        table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
+    });
+   
+  }
 
 
 function showPlayers(players){
    const idShowPlayers =  document.querySelector("#idShowPlayers");
 
-   let str ="<table>";
+   let str ="<table class='table table-bordered'>";
    str += "<tr><th>Name</th><th>Role</th><th>Label</th><th>Price</th></tr>";
   
    for(let player of players){
